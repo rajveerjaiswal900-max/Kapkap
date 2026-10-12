@@ -186,7 +186,7 @@ private fun requestAnswer(messages: List<ChatMessage>, endpoint: String, key: St
     val payload = JSONObject().put("model", model).put("messages", history).toString().toRequestBody("application/json; charset=utf-8".toMediaType())
     val request = Request.Builder().url(endpoint).post(payload).header("Content-Type", "application/json").apply { if (key.isNotBlank()) header("Authorization", "Bearer $key") }.build()
     val client = OkHttpClient.Builder().connectTimeout(20, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).callTimeout(70, TimeUnit.SECONDS).build()
-    client.newCall(request).execute().use { response ->
+    return client.newCall(request).execute().use { response ->
         val body = response.body?.string().orEmpty()
         if (!response.isSuccessful) error("HTTP ${response.code}: ${body.take(180)}")
         JSONObject(body).optJSONArray("choices")?.optJSONObject(0)?.optJSONObject("message")?.optString("content")?.takeIf { it.isNotBlank() }
